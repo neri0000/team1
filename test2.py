@@ -21,9 +21,11 @@ tolk_list = ["軽く机回りを掃除したらどうだ？作業スペースが
 "そろそろアレ買っといた方がいいんじゃない？","スマホ触ってないだろうな？メリハリ持てているか？","お疲れ様！どう？ここらで一旦休憩と行きましょうよ",
 "そんでもって今日の天気は"+str(tenki_today.text)+"窓の外見て確認してみてよ...どうだった？"]
 
-act = random.randint(0,len(tolk_list)-1)
+act = random.randint(30,60)
 count = 0
 def work():
+    #気まぐれ時間設定
+    act = random.randint(30,60)
     global count
     if count >= len(tolk_list):
         random.shuffle(tolk_list)
@@ -35,7 +37,7 @@ def work():
 
     notification.notify(
     title="いるか先輩",
-    message= "私が起きてから約%s分が経過したぞ"%(m)+'\n'+ tolk_list[9],
+    message= "私が起きてから約%s分が経過したぞ"%(m)+'\n'+ tolk_list[count],
     app_icon='icon/iru2.ico',
     timeout=5
     )
@@ -48,9 +50,10 @@ def minute(num):
     td = datetime.timedelta(seconds=t)
     return divmod(td.seconds, 60)
 
-#一分経過毎に関数workが実行される
-schedule.every(10).seconds.do(work)
-#schedule.every(1).minutes.do(work)
+#10秒経過毎に関数workが実行される
+#schedule.every(10).seconds.do(work)
+#10分経過毎に関数workが実行される
+schedule.every(10).minutes.do(work)
 while True:
    schedule.run_pending()
    time.sleep(1)
