@@ -6,12 +6,10 @@ import datetime
 import urllib3
 from bs4 import BeautifulSoup
 
+#天気情報の獲得
 url = 'https://weather.yahoo.co.jp/weather/jp/13/4410.html'
-
-#URLにアクセスする 戻り値にはアクセスした結果やHTMLなどが入ったinstanceが帰ってきます
 http = urllib3.PoolManager()
 instance = http.request('GET', url)
-#instanceからHTMLを取り出して、BeautifulSoupで扱えるようにパースします
 soup = BeautifulSoup(instance.data, 'html.parser')
 tenki_today = soup.select_one('#main > div.forecastCity > table > tr > td > div > p.pict')
 
@@ -21,25 +19,35 @@ nia = time.time()
 tolk_list = ["軽く机回りを掃除したらどうだ？作業スペースが狭いと効率が落ちるど","課題は終わっているか？早めにやっといた方が...え、終わってる？余計なお世話だったか",
 "猫背になってないか？体を伸ばしてあげたらどうだ？","捗っているか？君は頑張り屋だからな、適度に休憩を挟めよ","そろそろ休憩したい。","もしかして煩いか？",
 "そろそろアレ買っといた方がいいんじゃない？","スマホ触ってないだろうな？メリハリ持てているか？","お疲れ様！どう？ここらで一旦休憩と行きましょうよ...あっ保存忘れずにね",
-"そんでもって今日の天気は%sらしいぞ！窓の外見て確認してみてよ...どうだった？"%(tenki_today.text)]
+"そんでもって今日の天気は"+(tenki_today.text)+"らしいぞ！窓の外見て確認してみてよ...どうだった？"]
 
 act = random.randint(0,len(tolk_list)-1)
-
+count = 0
 def work():
-    act = random.randint(0,len(tolk_list)-1)
+    global count
+    if count >= len(tolk_list):
+        random.shuffle(tolk_list)
+        count = 0
 
-    now = time.time()
-    t = now - nia
-    td = datetime.timedelta(seconds=t)
+    #act = random.randint(0,len(tolk_list)-1)
 
-    m,s  = divmod(td.seconds, 60)
+    m,s = minute(nia)
 
     notification.notify(
     title="いるか先輩",
-    message= "私が起きてから約%s分が経過したぞ"%(m)+'\n'+ tolk_list[act],
+    message= "私が起きてから約%s分が経過したぞ"%(m)+'\n'+ tolk_list[count],
     app_icon='icon/iru2.ico',
     timeout=5
-)
+    )
+    count+=1
+
+#経過時間を返す
+def minute(num):
+    now = time.time()
+    t = now - num
+    td = datetime.timedelta(seconds=t)
+    return divmod(td.seconds, 60)
+
 #一分経過毎に関数workが実行される
 schedule.every(10).seconds.do(work)
 #schedule.every(1).minutes.do(work)
